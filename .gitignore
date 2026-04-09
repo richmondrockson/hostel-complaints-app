@@ -23,4 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
+# Environment variables
 src/.env
+src/.env.local
+src/.env.production
+src/.env.development
+src/.env.test   
+
+#Firebase
