@@ -56,4 +56,33 @@ router.get("/", verifyToken, async (req, res) => {
   }
 });
 
+// Get a specific complaint by ID
+router.get("/:id", verifyToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const docRef = await db.collection("complaints").doc(id);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({ error: "Complaint not found." });
+    }
+    const complaint = { id: doc.id, ...doc.data() };
+
+    //only allow students to view their own complaints
+    if (complaint.studentId !== req.user.uid) {
+      return re
+        .status(403)
+        .json({
+          error: "Access denied. You can only view your own complaints.",
+        });
+    }
+
+    res.status(200).json(complaint);
+  } catch (error) {
+    console.error("Error fetching complaint:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
 module.exports = router;
