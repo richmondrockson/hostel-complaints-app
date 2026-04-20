@@ -71,16 +71,58 @@ router.get("/:id", verifyToken, async (req, res) => {
 
     //only allow students to view their own complaints
     if (complaint.studentId !== req.user.uid) {
-      return re
-        .status(403)
-        .json({
-          error: "Access denied. You can only view your own complaints.",
-        });
+      return re.status(403).json({
+        error: "Access denied. You can only view your own complaints.",
+      });
     }
 
     res.status(200).json(complaint);
   } catch (error) {
     console.error("Error fetching complaint:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+router.patch("/:id", verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, adminNote } = req.body;
+
+    const validStatuses = ["open", "in progress", "resolved", "pending"];
+    if (!status || !validStatuses.includes(status)) {
+      return res
+        .status(400)
+        .json({
+          error: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
+        });
+    }
+
+    const docRef = db.collection("complaints").doc(id);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({ error: "Complaint not found." });
+    }
+
+    const updateData = {
+      status,
+      updatedAt: new Date().toISOString(),
+      resolvedBy: req.user.email,
+    };
+
+    if (adminNote) {
+      updateData.adminNote = adminNote;
+    }
+
+    await docRef.update(updateData);
+    res
+      .status(200)
+      .json({
+        message: "Complaint updated successfully.",
+        updatedFields: updateData,
+      });
+  } catch (error) {
+    console.error("Error updating complaint:", error);
     res.status(500).json({ error: "Internal server error." });
   }
 });
