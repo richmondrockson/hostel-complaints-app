@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { db } = require("../config/firebase");
 const verifyToken = require("../middleware/verifyToken");
-
+const verifyAdmin = require("../middleware/verifyAdmin");
 // Create a new complaint
 router.post("/", async (req, res) => {
   try {
@@ -90,11 +90,9 @@ router.patch("/:id", verifyToken, verifyAdmin, async (req, res) => {
 
     const validStatuses = ["open", "in progress", "resolved", "pending"];
     if (!status || !validStatuses.includes(status)) {
-      return res
-        .status(400)
-        .json({
-          error: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
-        });
+      return res.status(400).json({
+        error: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
+      });
     }
 
     const docRef = db.collection("complaints").doc(id);
@@ -115,14 +113,42 @@ router.patch("/:id", verifyToken, verifyAdmin, async (req, res) => {
     }
 
     await docRef.update(updateData);
-    res
-      .status(200)
-      .json({
-        message: "Complaint updated successfully.",
-        updatedFields: updateData,
-      });
+    res.status(200).json({
+      message: "Complaint updated successfully.",
+      updatedFields: updateData,
+    });
   } catch (error) {
     console.error("Error updating complaint:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+router.get("/admin/complaints", verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { status, category } = req.query;
+
+    let complaintsQuery = db
+      .collection("complaints")
+      .orderBy("createdAt", "desc");
+    if (status) {
+      complaintsQuery = complaintsQuery.where("status", "==", status);
+    }
+    if (category) {
+      complaintsQuery = complaintsQuery.where("category", "==", category);
+    }
+
+    const snapshot = await complaintsQuery.get();
+    const complaints = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    res.status(200).json({
+      count: complaints.length,
+      complaints,
+    });
+  } catch (error) {
+    console.error("Error fetching all complaints:", error);
     res.status(500).json({ error: "Internal server error." });
   }
 });
