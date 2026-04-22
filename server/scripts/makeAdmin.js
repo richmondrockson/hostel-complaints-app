@@ -1,4 +1,4 @@
-const { admin } = require("../firebase");
+const { admin } = require("../config/firebase");
 
 const UID = "W0IDyyirUeY4NBydh7I5jMfBQ2i1";
 
