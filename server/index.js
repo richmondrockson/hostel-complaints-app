@@ -5,7 +5,8 @@ const PORT = 5000;
 app.use(express.json());
 
 const complaintRoutes = require("./routes/complaints");
-app.use("/complaints", complaintRoutes);
+app.use("/api/complaints", complaintRoutes);
+app.use("/api/admin", complaintRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello from the hostel complaint app!");
