@@ -23,7 +23,7 @@ const Login = () => {
       );
       console.log("Logged in:", userCredential.user);
       alert("Login successful!");
-      navigate("/Dashboard");
+      navigate("/dashboard");
     } catch (error) {
       console.error(error.message);
       alert(error.message);

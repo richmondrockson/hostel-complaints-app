@@ -70,12 +70,14 @@ export default function Dashboard() {
   const [complaints, setComplaints] = useState([]);
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged((u) => {
       if (!u) {
         navigate("/login");
+        console.log("No user logged in");
         return;
       }
       setUser(u);
@@ -85,15 +87,25 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!user) return;
+
     const q = query(
       collection(db, "complaints"),
       where("studentId", "==", user.uid),
       orderBy("createdAt", "desc"),
     );
-    const unsub = onSnapshot(q, (snap) => {
-      setComplaints(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-      setLoading(false);
-    });
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setComplaints(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+        setLoading(false);
+        setError(null);
+      },
+      (snapshotError) => {
+        console.error("Complaint snapshot error:", snapshotError);
+        setError(snapshotError.message || "Unable to load complaints.");
+        setLoading(false);
+      },
+    );
     return unsub;
   }, [user]);
 
@@ -319,6 +331,16 @@ export default function Dashboard() {
         }
         .db-notice-meta { font-size: 11px; color: #9bbcbc; }
 
+        .db-error-banner {
+          background: #fff4f2;
+          color: #b23312;
+          border: 1px solid #f5c6cb;
+          padding: 14px 18px;
+          border-radius: 12px;
+          margin-bottom: 16px;
+          font-size: 13px;
+        }
+
         /* Empty */
         .db-empty { padding: 40px 22px; text-align: center; color: #9bbcbc; font-size: 13px; line-height: 1.6; }
 
@@ -419,6 +441,7 @@ export default function Dashboard() {
           </header>
 
           <main className="db-content">
+            {error && <div className="db-error-banner">{error}</div>}
             {/* Stat cards */}
             <div className="db-stats">
               <StatCard
