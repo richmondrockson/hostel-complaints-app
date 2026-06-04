@@ -10,6 +10,8 @@ import {
 } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import MyComplaints from "../components/myComplaints";
+import Notices from "../components/notices";
 
 function formatDate(ts) {
   if (!ts) return "";
@@ -442,141 +444,165 @@ export default function Dashboard() {
 
           <main className="db-content">
             {error && <div className="db-error-banner">{error}</div>}
-            {/* Stat cards */}
-            <div className="db-stats">
-              <StatCard
-                label="Total Complaints"
-                value={loading ? "—" : stats.total}
-                sub="This semester"
-                iconBg="rgba(45,189,170,0.12)"
-                icon={<FileIcon color="#2dbdaa" />}
-              />
-              <StatCard
-                label="In Progress"
-                value={loading ? "—" : stats.inProgress}
-                sub="Currently being addressed"
-                iconBg="rgba(245,166,35,0.12)"
-                icon={<ClockIcon color="#f5a623" />}
-              />
-              <StatCard
-                label="Resolved"
-                value={loading ? "—" : stats.resolved}
-                sub="Successfully fixed"
-                iconBg="rgba(45,189,170,0.12)"
-                icon={<CheckIcon color="#2dbdaa" />}
-              />
-              <StatCard
-                label="Pending"
-                value={loading ? "—" : stats.pending}
-                sub="Awaiting assignment"
-                iconBg="rgba(240,90,40,0.1)"
-                icon={<AlertIcon color="#f05a28" />}
-              />
-            </div>
 
-            {/* Bottom panels */}
-            <div className="db-bottom">
-              <div className="db-panel">
-                <div className="db-panel-head">
-                  <span className="db-panel-title">Recent Complaints</span>
-                  <button
-                    className="db-view-all"
-                    onClick={() => setActiveNav("complaints")}
-                  >
-                    View All
-                  </button>
+            {/* ── Dashboard view ── */}
+            {activeNav === "dashboard" && (
+              <>
+                {/* Stat cards */}
+                <div className="db-stats">
+                  <StatCard
+                    label="Total Complaints"
+                    value={loading ? "—" : stats.total}
+                    sub="This semester"
+                    iconBg="rgba(45,189,170,0.12)"
+                    icon={<FileIcon color="#2dbdaa" />}
+                  />
+                  <StatCard
+                    label="In Progress"
+                    value={loading ? "—" : stats.inProgress}
+                    sub="Currently being addressed"
+                    iconBg="rgba(245,166,35,0.12)"
+                    icon={<ClockIcon color="#f5a623" />}
+                  />
+                  <StatCard
+                    label="Resolved"
+                    value={loading ? "—" : stats.resolved}
+                    sub="Successfully fixed"
+                    iconBg="rgba(45,189,170,0.12)"
+                    icon={<CheckIcon color="#2dbdaa" />}
+                  />
+                  <StatCard
+                    label="Pending"
+                    value={loading ? "—" : stats.pending}
+                    sub="Awaiting assignment"
+                    iconBg="rgba(240,90,40,0.1)"
+                    icon={<AlertIcon color="#f05a28" />}
+                  />
                 </div>
-                {loading ? (
-                  <div
-                    style={{
-                      padding: "18px 22px",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 16,
-                    }}
-                  >
-                    {[1, 2, 3].map((i) => (
+
+                {/* Bottom panels */}
+                <div className="db-bottom">
+                  <div className="db-panel">
+                    <div className="db-panel-head">
+                      <span className="db-panel-title">Recent Complaints</span>
+                      <button
+                        className="db-view-all"
+                        onClick={() => setActiveNav("complaints")}
+                      >
+                        View All
+                      </button>
+                    </div>
+                    {loading ? (
                       <div
-                        key={i}
                         style={{
+                          padding: "18px 22px",
                           display: "flex",
                           flexDirection: "column",
-                          gap: 8,
+                          gap: 16,
                         }}
                       >
-                        <div className="db-skeleton" style={{ width: "55%" }} />
-                        <div
-                          className="db-skeleton"
-                          style={{ width: "38%", height: 10 }}
-                        />
+                        {[1, 2, 3].map((i) => (
+                          <div
+                            key={i}
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 8,
+                            }}
+                          >
+                            <div
+                              className="db-skeleton"
+                              style={{ width: "55%" }}
+                            />
+                            <div
+                              className="db-skeleton"
+                              style={{ width: "38%", height: 10 }}
+                            />
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                ) : recentComplaints.length === 0 ? (
-                  <div className="db-empty">
-                    No complaints yet.{" "}
-                    <span
-                      style={{
-                        color: "#2dbdaa",
-                        cursor: "pointer",
-                        fontWeight: 600,
-                      }}
-                      onClick={() => navigate("/complaints/new")}
-                    >
-                      Submit your first one →
-                    </span>
-                  </div>
-                ) : (
-                  recentComplaints.map((c) => (
-                    <div className="db-complaint-row" key={c.id}>
-                      <div className="db-complaint-info">
-                        <div className="db-complaint-title">{c.title}</div>
-                        <div className="db-complaint-meta">
-                          <span>
-                            #{c.complaintId || c.id.slice(0, 7).toUpperCase()}
-                          </span>
-                          <span className="db-complaint-meta-dot" />
-                          <span>{c.category}</span>
-                          <span className="db-complaint-meta-dot" />
-                          <span>{formatDate(c.createdAt)}</span>
+                    ) : recentComplaints.length === 0 ? (
+                      <div className="db-empty">
+                        No complaints yet.{" "}
+                        <span
+                          style={{
+                            color: "#2dbdaa",
+                            cursor: "pointer",
+                            fontWeight: 600,
+                          }}
+                          onClick={() => navigate("/complaints/new")}
+                        >
+                          Submit your first one →
+                        </span>
+                      </div>
+                    ) : (
+                      recentComplaints.map((c) => (
+                        <div className="db-complaint-row" key={c.id}>
+                          <div className="db-complaint-info">
+                            <div className="db-complaint-title">{c.title}</div>
+                            <div className="db-complaint-meta">
+                              <span>
+                                #
+                                {c.complaintId ||
+                                  c.id.slice(0, 7).toUpperCase()}
+                              </span>
+                              <span className="db-complaint-meta-dot" />
+                              <span>{c.category}</span>
+                              <span className="db-complaint-meta-dot" />
+                              <span>{formatDate(c.createdAt)}</span>
+                            </div>
+                          </div>
+                          <StatusBadge status={c.status} />
                         </div>
-                      </div>
-                      <StatusBadge status={c.status} />
-                    </div>
-                  ))
-                )}
-              </div>
+                      ))
+                    )}
+                  </div>
 
-              <div className="db-panel">
-                <div className="db-panel-head">
-                  <span className="db-panel-title">Recent Notices</span>
-                  <button
-                    className="db-view-all"
-                    onClick={() => setActiveNav("notices")}
-                  >
-                    View All
-                  </button>
-                </div>
-                {notices.length === 0 ? (
-                  <div className="db-empty">No notices yet.</div>
-                ) : (
-                  notices.map((n) => (
-                    <div className="db-notice-row" key={n.id}>
-                      <div className="db-notice-icon">
-                        <BellIcon color="#2dbdaa" size={14} />
-                      </div>
-                      <div className="db-notice-info">
-                        <div className="db-notice-title">{n.title}</div>
-                        <div className="db-notice-meta">
-                          {formatDate(n.date)}
-                          {n.scope ? ` · ${n.scope}` : ""}
-                        </div>
-                      </div>
+                  <div className="db-panel">
+                    <div className="db-panel-head">
+                      <span className="db-panel-title">Recent Notices</span>
+                      <button
+                        className="db-view-all"
+                        onClick={() => setActiveNav("notices")}
+                      >
+                        View All
+                      </button>
                     </div>
-                  ))
-                )}
-              </div>
-            </div>
+                    {notices.length === 0 ? (
+                      <div className="db-empty">No notices yet.</div>
+                    ) : (
+                      notices.map((n) => (
+                        <div className="db-notice-row" key={n.id}>
+                          <div className="db-notice-icon">
+                            <BellIcon color="#2dbdaa" size={14} />
+                          </div>
+                          <div className="db-notice-info">
+                            <div className="db-notice-title">{n.title}</div>
+                            <div className="db-notice-meta">
+                              {formatDate(n.date)}
+                              {n.scope ? ` · ${n.scope}` : ""}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ── My Complaints view ── */}
+            {activeNav === "complaints" && (
+              <MyComplaints complaints={complaints} loading={loading} />
+            )}
+
+            {/* ── Notices view ── */}
+            {activeNav === "notices" && <Notices notices={notices} />}
+
+            {/* ── Profile view ── */}
+            {activeNav === "profile" && (
+              <div className="db-empty">Profile coming soon.</div>
+            )}
           </main>
         </div>
       </div>

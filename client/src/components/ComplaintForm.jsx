@@ -48,9 +48,6 @@ export default function ComplaintForm({ onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState("");
 
-  // Generic change handler — works for all inputs
-  // Instead of writing a separate handler for each field,
-  // we use the input's name attribute to know which field to update
   function handleChange(e) {
     const { name, value } = e.target;
     setFields((prev) => ({ ...prev, [name]: value }));
@@ -79,64 +76,50 @@ export default function ComplaintForm({ onSuccess }) {
 
   // ── Form submission ─────────────────────────────────────
   async function handleSubmit(e) {
-    // Prevent the browser's default form behavior (page refresh)
     e.preventDefault();
 
     // Step 1: Run client-side validation
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      return; // Stop here — don't send the request
+      return;
     }
 
     setLoading(true);
     setServerError("");
 
-    try {
-      // Step 2: Get the Firebase ID token from the currently logged-in user
-      // This is the token your verifyToken middleware will check on the backend
-      // getIdToken() returns a fresh token — it auto-refreshes if expired
-      const token = await auth.currentUser.getIdToken();
+    const token = await auth.currentUser.getIdToken();
 
-      // Include the authenticated user's identity so the backend can save it
+    try {
       const requestBody = {
         ...fields,
         studentId: auth.currentUser?.uid,
         studentEmail: auth.currentUser?.email,
       };
 
-      // Step 3: Send the POST request to your backend
       const response = await fetch("http://localhost:5000/api/complaints", {
         method: "POST",
         headers: {
-          // Tell the backend the body is JSON
           "Content-Type": "application/json",
-          // Attach the Firebase token — this is what verifyToken reads
+
           Authorization: `Bearer ${token}`,
         },
-        // Convert the fields object to a JSON string for the request body
+
         body: JSON.stringify(requestBody),
       });
 
-      // Step 4: Parse the response
       const data = await response.json();
 
-      // Step 5: Check if the request was successful
-      // response.ok is true for status codes 200-299
       if (!response.ok) {
         setServerError(data.error || "Something went wrong. Please try again.");
         return;
       }
 
-      // Step 6: Tell the parent page the submission was successful
-      // Pass the complaint ID so the success message can show it
       onSuccess(data.complaintId);
     } catch (error) {
-      // This catches network errors — e.g. your backend server is not running
       console.error("Submission error:", error);
       setServerError("Could not connect to the server. Please try again.");
     } finally {
-      // Always runs — whether success or error
       setLoading(false);
     }
   }
