@@ -21,9 +21,13 @@ const Login = () => {
         email,
         password,
       );
-      console.log("Logged in:", userCredential.user);
-      alert("Login successful!");
-      navigate("/dashboard");
+      const tokenResult = await userCredential.user.getIdTokenResult();
+
+      if (tokenResult.claims.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error) {
       console.error(error.message);
       alert(error.message);
@@ -31,7 +35,6 @@ const Login = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className={styles.container}>
       <div className={styles.card}>

@@ -113,6 +113,14 @@ export default function Dashboard() {
   }, [user]);
 
   useEffect(() => {
+    if (!user) return;
+    user.getIdTokenResult(true).then((result) => {
+      console.log("Email:", user.email);
+      console.log("Claims:", result.claims);
+    });
+  }, [user]);
+
+  useEffect(() => {
     const q = query(
       collection(db, "notices"),
       orderBy("date", "desc"),
