@@ -3,6 +3,7 @@ const router = express.Router();
 const { db } = require("../config/firebase");
 const verifyToken = require("../middleware/verifyToken");
 const verifyAdmin = require("../middleware/verifyAdmin");
+
 // Create a new complaint
 router.post("/", verifyToken, async (req, res) => {
   try {
@@ -41,7 +42,7 @@ router.post("/", verifyToken, async (req, res) => {
   }
 });
 
-// Get all complaints
+// Get all complaints By a Student
 router.get("/", verifyToken, async (req, res) => {
   try {
     const studentId = req.user.uid;
