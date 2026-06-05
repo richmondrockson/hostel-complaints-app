@@ -136,7 +136,7 @@ export default function Notices({ notices = [] }) {
 
   // Unread count — notices from last 7 days
   // Avoid calling impure Date.now() during render by memoizing a stable "now"
-  const now = useMemo(() => Date.now(), []);
+  const now = useState(() => Date.now(), []);
 
   const unreadCount = notices.filter((n) => {
     if (!n.date) return false;

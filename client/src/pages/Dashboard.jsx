@@ -12,6 +12,7 @@ import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import MyComplaints from "../components/myComplaints";
 import Notices from "../components/notices";
+import Profile from "../components/profile";
 
 function formatDate(ts) {
   if (!ts) return "";
@@ -601,7 +602,7 @@ export default function Dashboard() {
 
             {/* ── Profile view ── */}
             {activeNav === "profile" && (
-              <div className="db-empty">Profile coming soon.</div>
+              <Profile user={user} complaints={complaints} />
             )}
           </main>
         </div>
