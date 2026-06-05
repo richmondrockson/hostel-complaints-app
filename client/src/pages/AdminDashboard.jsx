@@ -12,7 +12,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 
-const API = "http://localhost:5000";
+const API = import.meta.env.VITE_API_URL;
 
 const STATUS_META = {
   open: { label: "Open", color: "#fff", bg: "#f5a623" },

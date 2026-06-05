@@ -1,26 +1,6 @@
-/**
- * components/ComplaintForm.jsx
- *
- * WHAT THIS IS:
- * A reusable form component that handles collecting and submitting
- * complaint data. It is used by the NewComplaint page.
- *
- * WHY IT'S A SEPARATE COMPONENT AND NOT INSIDE THE PAGE:
- * Separation of concerns — the form handles its own state and submission
- * logic. The page handles layout and navigation. If you ever need this
- * form somewhere else, you just import it.
- *
- * KEY CONCEPTS USED HERE:
- * 1. Controlled inputs — every input's value lives in React state
- * 2. getIdToken() — gets the Firebase token to send with the request
- * 3. fetch() — sends the POST request to your Express backend
- * 4. onSuccess prop — tells the parent page the form submitted successfully
- */
-
 import { useState } from "react";
 import { auth } from "../firebase";
 
-// Categories must match what your backend and Firestore expect
 const CATEGORIES = [
   "Plumbing",
   "Electrical",
@@ -32,11 +12,6 @@ const CATEGORIES = [
 ];
 
 export default function ComplaintForm({ onSuccess }) {
-  // ── Controlled input state ──────────────────────────────
-  // Every field in the form has its own piece of state.
-  // When the student types, state updates. When we submit,
-  // we read from state — not from the DOM directly.
-  // This is what "controlled inputs" means in React.
   const [fields, setFields] = useState({
     title: "",
     roomNumber: "",
@@ -56,10 +31,6 @@ export default function ComplaintForm({ onSuccess }) {
     setServerError("");
   }
 
-  // ── Client-side validation ──────────────────────────────
-  // We validate on the frontend BEFORE sending to the backend.
-  // This gives instant feedback to the student without a network request.
-  // The backend ALSO validates — never rely on frontend validation alone.
   function validate() {
     const newErrors = {};
     if (!fields.title.trim()) newErrors.title = "Title is required.";
@@ -78,7 +49,6 @@ export default function ComplaintForm({ onSuccess }) {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    // Step 1: Run client-side validation
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -97,16 +67,19 @@ export default function ComplaintForm({ onSuccess }) {
         studentEmail: auth.currentUser?.email,
       };
 
-      const response = await fetch("http://localhost:5000/api/complaints", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/complaints`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
 
-          Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
+          },
+
+          body: JSON.stringify(requestBody),
         },
-
-        body: JSON.stringify(requestBody),
-      });
+      );
 
       const data = await response.json();
 
