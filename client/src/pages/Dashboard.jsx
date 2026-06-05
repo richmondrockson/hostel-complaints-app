@@ -10,7 +10,7 @@ import {
 } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import MyComplaints from "../components/myComplaints";
+import MyComplaints from "../components/MyComplaints";
 import Notices from "../components/notices";
 import Profile from "../components/profile";
 
