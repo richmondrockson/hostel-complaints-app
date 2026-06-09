@@ -59,13 +59,11 @@ const Login = () => {
     }
   };
 
-  const handlePasswordReset = async (e) => {
-    e.preventDefault();
+  const handlePasswordReset = async () => {
     if (!resetEmail.trim()) {
       setResetMessage("Please enter your email address.");
       return;
     }
-
     setResetLoading(true);
     try {
       await sendPasswordResetEmail(auth, resetEmail);
@@ -520,76 +518,15 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    setResetMode((s) => !s);
+                    setResetMode(true);
                     setResetMessage("");
                     setResetEmail("");
                   }}
                 >
-                  {resetMode ? "Back to login" : "Forgot password?"}
+                  Forgot password?
                 </button>
               </div>
 
-              {/* Password reset mode */}
-              {resetMode && (
-                <div
-                  style={{
-                    background: "#f7fcfc",
-                    border: "1.5px solid #d6ecea",
-                    borderRadius: 10,
-                    padding: "16px",
-                    marginBottom: 16,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 10,
-                  }}
-                >
-                  <p
-                    style={{ fontSize: 13, color: "#6b9999", lineHeight: 1.6 }}
-                  >
-                    Enter your email address and we'll send you a link to reset
-                    your password.
-                  </p>
-                  <input
-                    className="lg-input"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={resetEmail}
-                    onChange={(e) => {
-                      setResetEmail(e.target.value);
-                      setResetMessage("");
-                    }}
-                    autoComplete="email"
-                  />
-                  {resetMessage && (
-                    <div
-                      style={{
-                        fontSize: 12,
-                        color: resetMessage.includes("sent")
-                          ? "#2dbdaa"
-                          : "#e05555",
-                        fontWeight: 500,
-                      }}
-                    >
-                      {resetMessage}
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    className="lg-btn"
-                    onClick={handlePasswordReset}
-                    disabled={resetLoading}
-                    style={{ marginTop: 0 }}
-                  >
-                    {resetLoading ? (
-                      <>
-                        <span className="lg-spinner" /> Sending...
-                      </>
-                    ) : (
-                      "Send Reset Email →"
-                    )}
-                  </button>
-                </div>
-              )}
               <button type="submit" className="lg-btn" disabled={loading}>
                 {loading ? (
                   <>
@@ -612,6 +549,211 @@ const Login = () => {
           </div>
         </div>
       </div>
+      {/* ── Forgot Password Modal ── */}
+      {resetMode && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(26,46,46,0.5)",
+            backdropFilter: "blur(4px)",
+            zIndex: 100,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 20,
+            animation: "fadeIn 0.2s ease",
+          }}
+          onClick={(e) => e.target === e.currentTarget && setResetMode(false)}
+        >
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: 16,
+              width: "100%",
+              maxWidth: 420,
+              boxShadow: "0 24px 64px rgba(26,46,46,0.2)",
+              overflow: "hidden",
+              animation: "slideUp 0.25s ease",
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+            }}
+          >
+            {/* Modal header */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "20px 24px",
+                borderBottom: "1px solid #d6ecea",
+              }}
+            >
+              <div>
+                <div
+                  style={{ fontSize: 16, fontWeight: 700, color: "#1a2e2e" }}
+                >
+                  Reset your password
+                </div>
+                <div style={{ fontSize: 12, color: "#9bbcbc", marginTop: 3 }}>
+                  We'll send a reset link to your email
+                </div>
+              </div>
+              <button
+                onClick={() => setResetMode(false)}
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  border: "none",
+                  background: "#eef6f6",
+                  color: "#6b9999",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path
+                    d="M1 1l10 10M11 1L1 11"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal body */}
+            <div
+              style={{
+                padding: "22px 24px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 14,
+              }}
+            >
+              <p style={{ fontSize: 13, color: "#6b9999", lineHeight: 1.6 }}>
+                Enter the email address associated with your account and we'll
+                send you a link to reset your password.
+              </p>
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                    color: "#4a7070",
+                    marginBottom: 7,
+                  }}
+                >
+                  Email Address
+                </label>
+                <input
+                  className="lg-input"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={resetEmail}
+                  onChange={(e) => {
+                    setResetEmail(e.target.value);
+                    setResetMessage("");
+                  }}
+                  autoComplete="email"
+                  autoFocus
+                />
+              </div>
+
+              {/* Message — success or error */}
+              {resetMessage && (
+                <div
+                  style={{
+                    padding: "10px 14px",
+                    borderRadius: 8,
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: resetMessage.includes("sent")
+                      ? "#2dbdaa"
+                      : "#e05555",
+                    background: resetMessage.includes("sent")
+                      ? "rgba(45,189,170,0.08)"
+                      : "rgba(224,85,85,0.08)",
+                    border: `1px solid ${
+                      resetMessage.includes("sent")
+                        ? "rgba(45,189,170,0.2)"
+                        : "rgba(224,85,85,0.2)"
+                    }`,
+                  }}
+                >
+                  {resetMessage}
+                </div>
+              )}
+            </div>
+
+            {/* Modal footer */}
+            <div
+              style={{
+                display: "flex",
+                gap: 10,
+                padding: "16px 24px",
+                borderTop: "1px solid #d6ecea",
+              }}
+            >
+              <button
+                onClick={() => setResetMode(false)}
+                style={{
+                  flex: 1,
+                  padding: 11,
+                  background: "#eef6f6",
+                  color: "#6b9999",
+                  border: "none",
+                  borderRadius: 9,
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePasswordReset}
+                disabled={resetLoading || resetMessage.includes("sent")}
+                style={{
+                  flex: 2,
+                  padding: 11,
+                  background: "#2dbdaa",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 9,
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  opacity:
+                    resetLoading || resetMessage.includes("sent") ? 0.6 : 1,
+                  transition: "background 0.15s",
+                }}
+              >
+                {resetLoading ? (
+                  <>
+                    <span className="lg-spinner" /> Sending...
+                  </>
+                ) : resetMessage.includes("sent") ? (
+                  "Email Sent ✓"
+                ) : (
+                  "Send Reset Link →"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
