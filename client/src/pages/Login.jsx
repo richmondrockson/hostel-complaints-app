@@ -22,6 +22,10 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const [resetMode, setResetMode] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetMessage, setResetMessage] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -51,6 +55,24 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  const handlePasswordReset = async (e) => {
+    e.preventDefault();
+    if(!resetEmail.trim()) {
+      setResetMessage("Please enter your email address.");
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      await auth.sendPasswordResetEmail(resetEmail);
+      setResetMessage("Password reset email sent! Check your inbox.");      
+    }
+    catch(err) {
+      setResetMessage(parseError(err.code));
+  } finally {
+      setResetLoading(false);
+    } 
 
   return (
     <>
@@ -492,9 +514,63 @@ const Login = () => {
 
               {/* Forgot password */}
               <div className="lg-forgot">
-                <button type="button">Forgot password?</button>
+                <button type="button" onClick={()=> {
+                  setResetMode((s) => !s);
+                  setResetMessage("");  
+                  setResetEmail("");
+                }}>
+                  {resetMode ? "Back to login" : "Forgot password?" }
+                </button>
               </div>
 
+              {/* Password reset mode */}
+              {resetMode && (
+                <div style={{
+                  background: "#f7fcfc",
+                  border: "1.5px solid #d6ecea",
+                  borderRadius: 10,
+                  padding: "16px",
+                  marginBottom: 16,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                }}>
+                  <p style={{ fontSize: 13, color: "#6b9999", lineHeight: 1.6 }}>
+                    Enter your email address and we'll send you a link to reset
+                    your password.
+                  </p>
+                  <input 
+                    className="lg-input"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={resetEmail}
+                    onChange={(e) => { setResetEmail(e.target.value); setResetMessage(""); }}
+                    autoComplete="email"
+                  />
+                  {resetMessage && (
+                    <div style={{
+                      fontSize: 12,
+                      color: resetMessage.includes("sent") ? "#2dbdaa" : "#e05555",
+                      fontWeight: 500,
+                    }}>
+                      {resetMessage}
+                    </div>
+                  )}
+                  <button 
+                    type="button" 
+                    className="lg-btn"
+                    onClick={handlePasswordReset}
+                    disabled={resetLoading}
+                    style={{marginTop: 0 }}
+                  >
+                    {resetLoading 
+                      ? <><span className="lg-spinner"/> Sending...</>
+                      : "Send reset email"
+                    }
+                  </button>
+                </div>
+                
+              )}
               <button type="submit" className="lg-btn" disabled={loading}>
                 {loading ? (
                   <>
