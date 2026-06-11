@@ -73,7 +73,7 @@ const CATEGORIES = [
 ];
 
 export default function AdminDashboard() {
-  const [user, setUser] = useState(null);
+  const [user] = useState(null);
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -85,39 +85,32 @@ export default function AdminDashboard() {
   const [activeNav, setActiveNav] = useState("complaints");
   const navigate = useNavigate();
 
+  // Keep Render backend alive by pinging every 14 minutes
+  useEffect(() => {
+    const ping = () => fetch(`${API}/`).catch(() => {});
+    ping(); // ping immediately on mount
+    const interval = setInterval(ping, 14 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Auth guard
   useEffect(() => {
-    const unsub = auth.onAuthStateChanged((u) => {
-      if (!u) {
-        navigate("/login");
-        return;
-      }
-      setUser(u);
-    });
-    return unsub;
-  }, [navigate]);
-
-  useEffect(() => {
     if (!user) return;
-    fetchComplaints();
-  }, [user]);
 
-  async function fetchComplaints() {
-    try {
-      setLoading(true);
-      const token = await auth.currentUser.getIdToken();
-      const res = await fetch(`${API}/api/admin/complaints`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setComplaints(data.complaints);
-    } catch (err) {
-      setError("Failed to load complaints. " + err.message);
-    } finally {
-      setLoading(false);
-    }
-  }
+    const q = query(collection(db, "complaints"), orderBy("createdAt", "desc"));
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setComplaints(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+        setLoading(false);
+      },
+      (err) => {
+        setError("Failed to load complaints: " + err.message);
+        setLoading(false);
+      },
+    );
+    return unsub;
+  }, [user]);
 
   const filtered = useMemo(() => {
     return complaints.filter((c) => {
