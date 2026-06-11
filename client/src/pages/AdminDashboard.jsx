@@ -73,7 +73,7 @@ const CATEGORIES = [
 ];
 
 export default function AdminDashboard() {
-  const [user] = useState(null);
+  const [user, setUser] = useState(null);
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -95,8 +95,19 @@ export default function AdminDashboard() {
 
   // Auth guard
   useEffect(() => {
-    if (!user) return;
+    const unsub = auth.onAuthStateChanged((u) => {
+      if (!u) {
+        navigate("/login");
+        return;
+      }
+      setUser(u);
+    });
+    return unsub;
+  }, [navigate]);
 
+  useEffect(() => {
+    if (!user) return;
+    // Real-time listener — updates instantly when any complaint changes
     const q = query(collection(db, "complaints"), orderBy("createdAt", "desc"));
     const unsub = onSnapshot(
       q,
