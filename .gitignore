@@ -1,3 +1,33 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Build output
+dist/
+dist-ssr/
+client/dist/
+
+# Environment variables (all locations, all variants)
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+client/.env
+client/.env.local
+client/.env.production
+client/.env.development
+server/.env
+
+# Firebase service account keys (any naming convention)
+*firebase-adminsdk*.json
+serviceAccountKey.json
+client/*firebase-adminsdk*.json
+client/serviceAccountKey.json
+server/*firebase-adminsdk*.json
+server/serviceAccountKey.json
+
 # Logs
 logs
 *.log
@@ -7,12 +37,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
+# Editor/OS files
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -23,11 +48,5 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment variables
-src/.env
-src/.env.local
-src/.env.production
-src/.env.development
-src/.env.test   
-
-#Firebase
+# Misc
+*.local
